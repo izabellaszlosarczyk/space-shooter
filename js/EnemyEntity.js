@@ -38,6 +38,14 @@ var EnemyEntity = function Entity(world, scene, objSrc, x, y, z, callback) {
     //scene.add(this.boxMesh);
     //debug off
 
+    this.spawnerOptions = {
+        spawnRate: 15000,
+        horizontalSpeed: 0.53,
+        verticalSpeed: 0.03,
+        timeScale: 1
+    };
+
+
     //disable rotation
     this.boxBody.angularDamping = 1;
     world.addBody(this.boxBody);
@@ -50,8 +58,20 @@ EnemyEntity.prototype.getObject = function getObject() {
     return this.obj;
 }
 
-EnemyEntity.prototype.update = function update() {
+EnemyEntity.prototype.update = function update(dt) {
     //update physics
+
+    if(this.particleSystem) {
+        this.tick = (this.tick || this.tick < 0)? this.tick+dt : 0;
+        this.particleSystem.update(this.tick);
+
+        this.particleOptions.position.x += Math.random();
+        this.particleOptions.position.z += Math.sin(this.tick * this.spawnerOptions.verticalSpeed);
+        this.particleOptions.position.y += Math.random();
+        for (var x = 0; x < this.spawnerOptions.spawnRate * dt; x++) {
+            this.particleSystem.spawnParticle(this.particleOptions);
+        }
+    }
 
     if (this.getObject()) {
         this.getObject().position.copy(this.boxBody.position);
@@ -99,20 +119,18 @@ EnemyEntity.prototype.destroyEntity = function destroyEntity() {
     this.particleSystem = new THREE.GPUParticleSystem({
         maxParticles: 250000
     });
-    for(var i = 0; i < 1000; i++) {
-        this.particleSystem.spawnParticle({
-            position: this.getObject().position.clone(),
-            positionRandomness: .8,
-            velocity: new THREE.Vector3(this.directon.x*ENEMY_SPEED*100, this.directon.y*ENEMY_SPEED*100, this.directon.z*ENEMY_SPEED*100),
-            velocityRandomness: .8,
-            color: 0xaa88ff,
-            colorRandomness: .2,
-            turbulence: .5,
-            lifetime: 2,
-            size: 5,
-            sizeRandomness: 1
-        });
-    }
+    this.particleOptions = {
+        position: this.getObject().position.clone(),
+        positionRandomness: 2.5,
+        velocity: new THREE.Vector3(0, 1*ENEMY_SPEED*100, 0),
+        velocityRandomness: 2.5,
+        color: 0xaa88ff,
+        colorRandomness: .2,
+        turbulence: 1,
+        lifetime: 5,
+        size: 4,
+        sizeRandomness: 1
+    };
     this.scene.add(this.particleSystem);
     this.scene.remove(this.obj);
     this.beingDestroyed = true
@@ -121,5 +139,5 @@ EnemyEntity.prototype.destroyEntity = function destroyEntity() {
     setTimeout(function () {
         _self.toDestroy = true;
         _self.scene.remove(_self.particleSystem);
-    }, 2500);
+    }, 1000);
 }

@@ -368,7 +368,7 @@
 
 
             for(var i = 0; i < updateableEntities.length; i++) {
-                updateableEntities[i].update();
+                updateableEntities[i].update(dt);
                 if(updateableEntities[i].toDestroy) {
                     updateableEntities.splice(i, 1);
                 }
