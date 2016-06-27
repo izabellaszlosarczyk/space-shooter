@@ -56,12 +56,14 @@
             }
 
         </style>
-        <script src="js/perlinNoise.js"></script>
-        <script src="js/materials.js"></script>
+
         <script src="libs/three.min.js"></script>
         <script src="libs/cannon.min.js"></script>
+        <script src="js/perlinNoise.js"></script>
+        <script src="js/materials.js"></script>
         <script src="js/PointerLockControls.js"></script>
         <script src="js/Entity.js"></script>
+        <script src="js/EnemyEntity.js"></script>
         <script src="js/MapLandscape.js"></script>
         <script src="js/MiscObjects.js"></script>
     </head>
@@ -172,22 +174,129 @@
             initCannon();
             init();
             initMars();
+
             animate();
 
-            var marsFloor, marsSkyBox;
+            var marsFloor, marsSkyBox, updateableEntities;
+
             function initMars() {
-                marsFloor = new MapLandscape(world, scene, 0, 0, 0, 500, 500, window.MATERIALS.floor.color, window.MATERIALS.floor.normal);
+                marsFloor = new MapLandscape(world, scene, 0, 0, 0, 250, 250, window.MATERIALS.floor.color, window.MATERIALS.floor.normal);
                 marsFloor.init();
 
                 marsSkyBox = new SkyBox(scene, window.MATERIALS.skyboxAssets);
                 marsSkyBox.init();
 
-                var ent = new Entity(world, scene, "./assets/objects/marsjanin/model.json", 0, 10, 0, function() {
-                    console.log(ent.getObject());
-                    ent.getObject().scale.x = 0.2;
-                    ent.getObject().scale.y = 0.2;
-                    ent.getObject().scale.z = 0.2;
+                updateableEntities = [];
+
+                var range = Array.apply(null, {length: 10}).map(Number.call, Number);
+                range.forEach(function(i) {
+                    var enemyX = (0.5+(0.5-Math.random())*100);
+                    var enemyY = 1;
+                    var enemyZ = (0.5+(0.5-Math.random())*100);
+
+                    var ent = new EnemyEntity(world, scene, "./assets/objects/marsjanin/model.json", enemyX, enemyY, enemyZ, function() {
+                        ent.getObject().scale.x = 0.2;
+                        ent.getObject().scale.y = 0.2;
+                        ent.getObject().scale.z = 0.2;
+                    });
+                    updateableEntities.push(ent);
+                })
+
+
+                var arr = [];
+                for ( var i = 0; i < 30; i ++ ) {
+                    arr.push(i);
+                }
+                arr.forEach(function(pos){
+                    var ent2 = new Entity(world, scene, "./assets/objects/kwiatek/model.json", 0, 10,  0, function() {
+                        console.log(ent2.getObject());
+                        ent2.getObject().scale.x = 0.2;
+                        ent2.getObject().scale.y = 0.2;
+                        ent2.getObject().scale.z = 0.2;
+                        if (pos > 15){
+                            ent2.getObject().position.x = pos*(pos+29);
+                        }
+                        else {
+                            ent2.getObject().position.x = -(5 + pos*(pos+29));
+                        }
+                        if (pos%2 == 0){
+                            ent2.getObject().position.z = pos*(pos+11);
+                        }
+                        else {
+                            ent2.getObject().position.z = -(7 + pos*(pos+11));
+                        }
+                    }); 
                 });
+
+                var arr2 = [];
+                for ( var i = 0; i < 16; i ++ ) {
+                    arr2.push(i);
+                }
+                arr2.forEach(function(pos){
+                    var ent2 = new Entity(world, scene, "./assets/objects/palma/model.json", 0, 10,  0, function() {
+                        console.log(ent2.getObject());
+                        ent2.getObject().scale.x = 0.4;
+                        ent2.getObject().scale.y = 0.4;
+                        ent2.getObject().scale.z = 0.4;
+                        if (pos > 8){
+                            ent2.getObject().position.x =  3 +  pos*(pos+29);
+                        }
+                        else {
+                            ent2.getObject().position.x = -(3 +  pos*(pos+27));
+                        }
+                        if (pos%2 == 0){
+                            ent2.getObject().position.z = 2+  pos*(pos+17);
+                        }
+                        else {
+                            ent2.getObject().position.z = -(2+  pos*(pos+17));
+                        }
+                    }); 
+                });
+
+                var arr3 = [];
+                for ( var i = 0; i < 16; i ++ ) {
+                    arr3.push(i);
+                }
+                arr3.forEach(function(pos){
+                    var ent2 = new Entity(world, scene, "./assets/objects/drzewo/model.json", 0, 10,  0, function() {
+                        console.log(ent2.getObject());
+                        ent2.getObject().scale.x = 0.4;
+                        ent2.getObject().scale.y = 0.4;
+                        ent2.getObject().scale.z = 0.4;
+                        if (pos > 8){
+                            ent2.getObject().position.x = 1 + pos*(pos+37);
+                        }
+                        else {
+                            ent2.getObject().position.x = -(1 + pos*(pos+16));
+                        }
+                        if (pos%2 == 0){
+                            ent2.getObject().position.z = 3+  pos*(pos+9);
+                        }
+                        else {
+                            ent2.getObject().position.z = -(3+  pos*(pos+9));
+                        }
+                    }); 
+                });
+                /*var geometry = new THREE.SphereGeometry(2, 20);
+
+
+                for ( var i = 0; i < 20; i ++ ) {
+
+                    material = new THREE.MeshPhongMaterial( { color: 0xffff00} );
+
+                    var mesh = new THREE.Mesh( geometry, material );
+                    mesh.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
+                    mesh.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
+                    mesh.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
+                    scene.add( mesh );
+
+                    //material.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+
+                    objects.push( mesh );
+
+                }*/
+
+
             }
 
             function initCannon(){
@@ -259,62 +368,6 @@
                 document.body.appendChild( renderer.domElement );
 
                 window.addEventListener( 'resize', onWindowResize, false );
-
-                // Add boxes
-                var halfExtents = new CANNON.Vec3(1,1,1);
-                var boxShape = new CANNON.Box(halfExtents);
-                var boxGeometry = new THREE.BoxGeometry(halfExtents.x*2,halfExtents.y*2,halfExtents.z*2);
-                for(var i=0; i<7; i++){
-                    var x = (Math.random()-0.5)*20;
-                    var y = 1 + (Math.random()-0.5)*1;
-                    var z = (Math.random()-0.5)*20;
-                    var boxBody = new CANNON.Body({ mass: 5 });
-                    boxBody.addShape(boxShape);
-                    var boxMesh = new THREE.Mesh( boxGeometry, material );
-                    world.addBody(boxBody);
-                    scene.add(boxMesh);
-                    boxBody.position.set(x,y,z);
-                    boxMesh.position.set(x,y,z);
-                    boxMesh.castShadow = true;
-                    boxMesh.receiveShadow = true;
-                    boxes.push(boxBody);
-                    boxMeshes.push(boxMesh);
-                }
-
-
-                // Add linked boxes
-                var size = 0.5;
-                var he = new CANNON.Vec3(size,size,size*0.1);
-                var boxShape = new CANNON.Box(he);
-                var mass = 0;
-                var space = 0.1 * size;
-                var N = 5, last;
-                var boxGeometry = new THREE.BoxGeometry(he.x*2,he.y*2,he.z*2);
-                for(var i=0; i<N; i++){
-                    var boxbody = new CANNON.Body({ mass: mass });
-                    boxbody.addShape(boxShape);
-                    var boxMesh = new THREE.Mesh(boxGeometry, material);
-                    boxbody.position.set(5,(N-i)*(size*2+2*space) + size*2+space,0);
-                    boxbody.linearDamping = 0.01;
-                    boxbody.angularDamping = 0.01;
-                    // boxMesh.castShadow = true;
-                    boxMesh.receiveShadow = true;
-                    world.addBody(boxbody);
-                    scene.add(boxMesh);
-                    boxes.push(boxbody);
-                    boxMeshes.push(boxMesh);
-
-                    if(i!=0){
-                        // Connect this body to the last one
-                        var c1 = new CANNON.PointToPointConstraint(boxbody,new CANNON.Vec3(-size,size+space,0),last,new CANNON.Vec3(-size,-size-space,0));
-                        var c2 = new CANNON.PointToPointConstraint(boxbody,new CANNON.Vec3(size,size+space,0),last,new CANNON.Vec3(size,-size-space,0));
-                        world.addConstraint(c1);
-                        world.addConstraint(c2);
-                    } else {
-                        mass=0.3;
-                    }
-                    last = boxbody;
-                }
             }
 
             function onWindowResize() {
@@ -335,14 +388,14 @@
                         ballMeshes[i].quaternion.copy(balls[i].quaternion);
                     }
 
-                    // Update box positions
-                    for(var i=0; i<boxes.length; i++){
-                        boxMeshes[i].position.copy(boxes[i].position);
-                        boxMeshes[i].quaternion.copy(boxes[i].quaternion);
-                    }
+
+                    updateableEntities.forEach(function (ent) {
+                        ent.update();
+                    });
                 }
 
                 controls.update( Date.now() - time );
+
                 renderer.render( scene, camera );
                 time = Date.now();
 
