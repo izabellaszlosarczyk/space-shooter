@@ -6,7 +6,6 @@ var Entity = function Entity(world, scene, objSrc, x, y, z, callback) {
     var _self = this;
     loader.load(objSrc, function ( object ) {
         _self.obj = object;
-        console.log(object);
         scene.add( object );
 
         if(callback) {

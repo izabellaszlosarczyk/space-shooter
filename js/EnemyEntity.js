@@ -8,7 +8,6 @@ var EnemyEntity = function Entity(world, scene, objSrc, x, y, z, callback) {
     var _self = this;
     loader.load(objSrc, function ( object ) {
         _self.obj = object;
-        console.log(object);
         scene.add( object );
 
         _self.getObject().position.x = x;
@@ -42,6 +41,8 @@ var EnemyEntity = function Entity(world, scene, objSrc, x, y, z, callback) {
     //disable rotation
     this.boxBody.angularDamping=1;
     world.addBody(this.boxBody);
+
+    this.toDestroy = false;
 }
 
 EnemyEntity.prototype.getObject = function getObject() {
@@ -87,4 +88,9 @@ EnemyEntity.prototype.update = function update() {
         var zSign = (Math.random() > 0.5)? 1 : -1;
         this.directon = new CANNON.Vec3(xSign*Math.random()*ENEMY_SPEED, 0, zSign*Math.random()*ENEMY_SPEED);
     }
+}
+
+EnemyEntity.prototype.destroyEntity = function destroyEntity() {
+    this.toDestroy = true;
+    scene.remove(this.obj);
 }
