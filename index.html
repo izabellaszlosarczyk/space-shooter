@@ -59,6 +59,7 @@
 
     <script src="libs/three.min.js"></script>
     <script src="libs/cannon.min.js"></script>
+    <script src="libs/GPUParticleSystem.js"></script>
     <script src="js/perlinNoise.js"></script>
     <script src="js/materials.js"></script>
     <script src="js/PointerLockControls.js"></script>
@@ -366,9 +367,12 @@
             }
 
 
-            updateableEntities.forEach(function (ent) {
-                ent.update();
-            });
+            for(var i = 0; i < updateableEntities.length; i++) {
+                updateableEntities[i].update();
+                if(updateableEntities[i].toDestroy) {
+                    updateableEntities.splice(i, 1);
+                }
+            }
         }
 
         controls.update(Date.now() - time);
