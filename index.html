@@ -16,15 +16,22 @@
             font-family: arial;
         }
 
-        #blocker {
-
+        #gui {
             position: absolute;
+            width: 20%;
+            height: 20%;
+            z-index: 1000;
+        }
 
+        #gui h3 {
+            color: white;
+        }
+
+        #blocker {
+            position: absolute;
             width: 100%;
             height: 100%;
-
             background-color: rgba(0, 0, 0, 0.5);
-
         }
 
         #instructions {
@@ -62,6 +69,9 @@
     <script src="libs/GPUParticleSystem.js"></script>
     <script src="js/perlinNoise.js"></script>
     <script src="js/materials.js"></script>
+    <script src="js/Sprite.js"></script>
+    <script src="js/Player.js"></script>
+    <script src="js/Ufo.js"></script>
     <script src="js/PointerLockControls.js"></script>
     <script src="js/Entity.js"></script>
     <script src="js/EnemyEntity.js"></script>
@@ -69,6 +79,8 @@
     <script src="js/MiscObjects.js"></script>
 </head>
 <body>
+<audio src="assets/audio/masjaninrozwalony.wav" id="alien-destroyed-audio" preload="auto"></audio>
+<audio src="assets/audio/strzal.wav" id="fire-audio" preload="auto"></audio>
 <div id="blocker">
 
     <div id="instructions">
@@ -77,6 +89,9 @@
         (W,A,S,D = Move, SPACE = Jump, MOUSE = Look, CLICK = Shoot)
     </div>
 
+</div>
+<div id="gui">
+    <h3 id="gui-content">Health: 100</h3>
 </div>
 
 <script>
@@ -178,16 +193,41 @@
 
     animate();
 
-    var marsFloor, marsSkyBox, updateableEntities;
+    var marsFloor, marsSkyBox, updateableEntities, player, rockSprite, enemyAudio, laserAudio, ufo, playerObjectEntity, lasers;
 
     function initMars() {
+        player = new Player(world, scene, renderer, camera, document.getElementById("gui-content"));
+        player.init();
+
+        lasers = [];
+
         marsFloor = new MapLandscape(world, scene, 0, 0, 0, 250, 250, window.MATERIALS.floor.color, window.MATERIALS.floor.normal);
         marsFloor.init();
 
         marsSkyBox = new SkyBox(scene, window.MATERIALS.skyboxAssets);
         marsSkyBox.init();
 
+        rockSprite = new Sprite(world, scene, window.MATERIALS.rockSprite, -125, 0, -125, 10, 10, 250, 250);
+
         updateableEntities = [];
+
+        ufo = new Ufo(world, scene, './assets/objects/ufo.json', 0, 20, 0, function () {
+            ufo.init();
+        });
+
+        playerObjectEntity = new Entity(world, scene, "./assets/objects/glowny/model2.json", 0, 0, 0, function () {
+            camera.add(playerObjectEntity.getObject());
+            playerObjectEntity.getObject().rotateY(Math.PI);
+            playerObjectEntity.getObject().position.x = 0;
+            playerObjectEntity.getObject().position.y = -0.65;
+            playerObjectEntity.getObject().position.z = -0.5;
+            playerObjectEntity.getObject().scale.x = 0.06;
+            playerObjectEntity.getObject().scale.y = 0.06;
+            playerObjectEntity.getObject().scale.z = 0.06;
+        });
+
+        enemyAudio = document.getElementById("alien-destroyed-audio");
+        laserAudio = document.getElementById("fire-audio");
 
         var range = Array.apply(null, {length: 10}).map(Number.call, Number);
         range.forEach(function (i) {
@@ -199,80 +239,43 @@
                 ent.getObject().scale.x = 0.2;
                 ent.getObject().scale.y = 0.2;
                 ent.getObject().scale.z = 0.2;
-            });
+            }, function () {
+                player.addHealth();
+            }, enemyAudio);
             updateableEntities.push(ent);
         })
 
 
-        var arr = [];
-        for (var i = 0; i < 30; i++) {
-            arr.push(i);
-        }
+        var arr = generateRange(6);
         arr.forEach(function (pos) {
             var ent2 = new Entity(world, scene, "./assets/objects/kwiatek/model.json", 0, 10, 0, function () {
                 ent2.getObject().scale.x = 0.2;
                 ent2.getObject().scale.y = 0.2;
                 ent2.getObject().scale.z = 0.2;
-                if (pos > 15) {
-                    ent2.getObject().position.x = pos * (pos + 29);
-                }
-                else {
-                    ent2.getObject().position.x = -(5 + pos * (pos + 29));
-                }
-                if (pos % 2 == 0) {
-                    ent2.getObject().position.z = pos * (pos + 11);
-                }
-                else {
-                    ent2.getObject().position.z = -(7 + pos * (pos + 11));
-                }
+                ent2.getObject().position.x = Math.random() * pos.x;
+                ent2.getObject().position.z = Math.random() * pos.y;
             });
         });
 
-        var arr2 = [];
-        for (var i = 0; i < 16; i++) {
-            arr2.push(i);
-        }
+        var arr2 = generateRange(3);
         arr2.forEach(function (pos) {
             var ent2 = new Entity(world, scene, "./assets/objects/palma/model.json", 0, 10, 0, function () {
                 ent2.getObject().scale.x = 0.4;
                 ent2.getObject().scale.y = 0.4;
                 ent2.getObject().scale.z = 0.4;
-                if (pos > 8) {
-                    ent2.getObject().position.x = 3 + pos * (pos + 29);
-                }
-                else {
-                    ent2.getObject().position.x = -(3 + pos * (pos + 27));
-                }
-                if (pos % 2 == 0) {
-                    ent2.getObject().position.z = 2 + pos * (pos + 17);
-                }
-                else {
-                    ent2.getObject().position.z = -(2 + pos * (pos + 17));
-                }
+                ent2.getObject().position.x = Math.random() * pos.x;
+                ent2.getObject().position.z = Math.random() * pos.y;
             });
         });
 
-        var arr3 = [];
-        for (var i = 0; i < 16; i++) {
-            arr3.push(i);
-        }
+        var arr3 = generateRange(3);
         arr3.forEach(function (pos) {
             var ent2 = new Entity(world, scene, "./assets/objects/drzewo/model.json", 0, 10, 0, function () {
                 ent2.getObject().scale.x = 0.4;
                 ent2.getObject().scale.y = 0.4;
                 ent2.getObject().scale.z = 0.4;
-                if (pos > 8) {
-                    ent2.getObject().position.x = 1 + pos * (pos + 37);
-                }
-                else {
-                    ent2.getObject().position.x = -(1 + pos * (pos + 16));
-                }
-                if (pos % 2 == 0) {
-                    ent2.getObject().position.z = 3 + pos * (pos + 9);
-                }
-                else {
-                    ent2.getObject().position.z = -(3 + pos * (pos + 9));
-                }
+                ent2.getObject().position.x = Math.random() * pos.x;
+                ent2.getObject().position.z = Math.random() * pos.y;
             });
         });
     }
@@ -355,7 +358,7 @@
     }
 
     var dt = 1 / 60;
-    function animate() {
+    function animate(nowMsec) {
         requestAnimationFrame(animate);
         if (controls.enabled) {
             world.step(dt);
@@ -367,12 +370,14 @@
             }
 
 
-            for(var i = 0; i < updateableEntities.length; i++) {
+            for (var i = 0; i < updateableEntities.length; i++) {
                 updateableEntities[i].update(dt);
-                if(updateableEntities[i].toDestroy) {
+                if (updateableEntities[i].toDestroy) {
                     updateableEntities.splice(i, 1);
                 }
             }
+
+            ufo.update(dt);
         }
 
         controls.update(Date.now() - time);
@@ -413,11 +418,20 @@
 
         var geometry = new THREE.Geometry();
         geometry.vertices.push(sphereBody.position.clone());
-        geometry.vertices.push(new THREE.Vector3(250*normalized.x, 250*normalized.y, 250*normalized.z));
+        geometry.vertices[0].x += normalized.x*2;
+        geometry.vertices[0].y = 1;
+        geometry.vertices[0].z += normalized.z*2;
+        geometry.vertices.push(new THREE.Vector3(250 * normalized.x, 250 * normalized.y, 250 * normalized.z));
 
         var line = new THREE.Line(geometry, material);
         scene.add(line);
-        setTimeout(function() {scene.remove(line)}, 500);
+
+        //play shoot
+        laserAudio.play();
+
+        setTimeout(function () {
+            scene.remove(line);
+        }, 250);
     }
 
     window.addEventListener("click", function (e) {

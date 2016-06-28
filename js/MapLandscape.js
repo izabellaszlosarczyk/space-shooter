@@ -52,7 +52,6 @@ MapLandscape.prototype.initGraphics = function init() {
         shininess: 35,
     });
 
-    console.log(segmentsX, segmentsY);
     var geometry = new THREE.PlaneGeometry(this.width, this.height, segmentsX, segmentsY);
 
     plane = new THREE.Mesh(geometry, material);
@@ -73,6 +72,7 @@ MapLandscape.prototype.initGraphics = function init() {
             var r = Math.sqrt(dX*dX + dY*dY);
 
             plane.geometry.vertices[i].z -= Math.random()*5 + r/100 + perlin.get2d(plane.geometry.vertices[i].x/this.width, plane.geometry.vertices[i].y/this.height)*2;
+            plane.geometry.vertices[i].z = (plane.geometry.vertices[i].z < 0)? plane.geometry.vertices[i].z : 0;
         }
     }
 

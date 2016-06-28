@@ -11,5 +11,12 @@ window.MATERIALS = {
         "./assets/skybox/nightwalker-id_dn.png",
         "./assets/skybox/nightwalker-id_rt.png",
         "./assets/skybox/nightwalker-id_lf.png",
+    ],
+    rockSprite: [
+        './assets/rock_sprite.png',
+        './assets/rock_sprite-1.png',
+        './assets/rock_sprite-2.png',
+        './assets/rock_sprite-3.png',
+        './assets/rock_sprite-4.png'
     ]
 }

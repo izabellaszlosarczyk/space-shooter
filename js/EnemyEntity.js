@@ -1,6 +1,6 @@
 var ENEMY_SPEED = 10;
 
-var EnemyEntity = function Entity(world, scene, objSrc, x, y, z, callback) {
+var EnemyEntity = function Entity(world, scene, objSrc, x, y, z, callback, onDestroyCallback, audio) {
     this.world = world;
     this.scene = scene;
 
@@ -52,6 +52,9 @@ var EnemyEntity = function Entity(world, scene, objSrc, x, y, z, callback) {
 
     this.toDestroy = false;
     this.beingDestroyed = false;
+
+    this.onDestroyCallback = onDestroyCallback;
+    this.audio = audio;
 }
 
 EnemyEntity.prototype.getObject = function getObject() {
@@ -135,9 +138,13 @@ EnemyEntity.prototype.destroyEntity = function destroyEntity() {
     this.scene.remove(this.obj);
     this.beingDestroyed = true
 
+    this.onDestroyCallback();
+    this.audio.play();
+
     var _self = this;
     setTimeout(function () {
         _self.toDestroy = true;
         _self.scene.remove(_self.particleSystem);
+        _self.scene.remove(_self.obj);
     }, 1000);
 }
